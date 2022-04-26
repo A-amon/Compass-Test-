@@ -6,6 +6,11 @@
 	align-items: stretch;
 	justify-content: stretch;
 	position:relative;
+	flex-direction: column;
+
+	&-reminder{
+		text-align: center;
+	}
 
 	&-directions{
 		position:relative;
@@ -17,6 +22,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		transition:transform 0.3s linear;
 
 		&-container{
 			position:absolute;

@@ -12,6 +12,7 @@ const handleAddImageSelect = (event) => {
 	const reader = new FileReader()
 	reader.addEventListener("load", showSelectedImage)
 	reader.readAsDataURL(image)
+	event.target.value = ""	// Allows reading same file multiple times
 }
 
 const showSelectedImage = (event) => {
@@ -30,6 +31,7 @@ const addSidebarItem = (imageURL) => {
 	<button class="sidebar-item__button sidebar-item__button-delete" aria-label="Delete image" title="Delete image">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M23 20.168l-8.185-8.187 8.185-8.174-2.832-2.807-8.182 8.179-8.176-8.179-2.81 2.81 8.186 8.196-8.186 8.184 2.81 2.81 8.203-8.192 8.18 8.192z"/></svg>
 	</button>
+	<div class="sidebar-item__toggle"></div>
 	<div class="actions-dropdown">
 		<h3 class="sr-only">Actions</h3>
 		<ul class="actions-dropdown__items">
@@ -47,7 +49,7 @@ const addSidebarItem = (imageURL) => {
 	newSidebarItem.querySelector(".actions-dropdown__item-range").addEventListener("input", event => handleImageOpacityChange(event, newSidebarItem))
 	const addCompassButton = newSidebarItem.querySelector(".actions-dropdown__item-button")
 	addCompassButton.addEventListener("click", event => handleAddCompassClick(event, newSidebarItem))
-	addCompassButton.disabled = !isCompassEnabled
+	addCompassButton.disabled = !isCompassEnabled	// Disable "Add Compass" button if not on mobile
 
 	// Maintain Add-Image button as last item
 	const sidebarItemButton = sidebarItems.children[sidebarItems.children.length - 1]
@@ -102,8 +104,7 @@ const compassText = document.querySelector(".content-directions__text")
 
 /**
  * Watch for device movement
- * Update layers(with added compass) when direction to North changes/ device moves
- * Disable "Add Compass" buttons if not on mobile
+ * Update layers(with added compass) when device rotates
  */
 const handleDeviceOrientation = (event) => {
 	const heading = event.webkitCompassHeading || Math.abs(event.alpha - 360)
@@ -114,7 +115,7 @@ const handleDeviceOrientation = (event) => {
 
 /**
  * Rotate all layers(with added compass)
- * By {degFromNorth} degrees
+ * By {angle} degrees
  * @param {double} angle 
  */
 const rotateLayersWithCompass = (angle) => {

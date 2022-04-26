@@ -59,10 +59,25 @@
 	}
 }
 
-.sidebar-item{
+.sidebar-item.selected{
 	position:relative;
 
-	&:hover .actions-dropdown{
-		display:block;
+	.sidebar-item__toggle{
+		height:70%;
+		width:70%;
+		background-color: transparent;
+		position:absolute;
+		top:0;
+		left:0;
+		right:0;
+		bottom:0;
+		margin:auto;
+		&:hover + .actions-dropdown{
+			display:block;
+		}
+	}
+
+	.actions-dropdown:hover{
+		display: block;
 	}
 }
