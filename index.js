@@ -63,7 +63,7 @@ const layersWithCompass = []
 const handleAddCompassClick = (event, sidebarItem) => {
 	const sidebarItemInd = getSidebarItemInd(sidebarItem)
 	layersWithCompass.push(sidebarItemInd)
-	rotateLayersWithCompass(degFromNorth)
+	rotateLayersWithCompass(northAngle)
 }
 
 const handleImageOpacityChange = (event, sidebarItem) => {
@@ -98,36 +98,20 @@ const getSidebarItemInd = (sidebarItem) => {
 }
 
 var isCompassEnabled = false
-var degFromNorth = 0
+var northAngle = 0
 
 /**
  * Watch for device movement
  * Update layers(with added compass) when direction to North changes/ device moves
- * Disable "Add Compass" buttons if Location permission not granted/North direction not detected
+ * Disable "Add Compass" buttons if not on mobile
  */
-const trackLocation = () => {
-	navigator.geolocation.watchPosition(
-		(position) => {
-			const _degFromNorth = position.coords.heading
-
-			if(_degFromNorth === null){
-				isCompassEnabled = false
-			}
-			else{
-				isCompassEnabled = true
-				degFromNorth = _degFromNorth
-				rotateLayersWithCompass(degFromNorth)
-			}
-
-			toggleAddCompassButton(isCompassEnabled)
-		},
-		(error) => {
-			if(error.code === error.PERMISSION_DENIED){
-				isCompassEnabled = false
-				toggleAddCompassButton(isCompassEnabled)
-			}
-		}
-	)
+const handleDeviceOrientation = (orientation) => {
+	orientation.listen(function() {
+		const currentOrientation = orientation.getScreenAdjustedEuler();
+		const compassHeading = (360 - currentOrientation.alpha + 90) % 360;
+		northAngle = 360 - compassHeading
+		rotateLayersWithCompass(northAngle)
+	})
 }
 
 /**
@@ -143,13 +127,24 @@ const toggleAddCompassButton = (isEnabled) => {
 /**
  * Rotate all layers(with added compass)
  * By {degFromNorth} degrees
- * @param {double} degFromNorth 
+ * @param {double} angle 
  */
-const rotateLayersWithCompass = (degFromNorth) => {
+const rotateLayersWithCompass = (angle) => {
 	for(const layerInd of layersWithCompass){
-		contentLayers.children[layerInd].style.transform = `rotate(${degFromNorth}deg)`
+		contentLayers.children[layerInd].style.transform = `rotate(${angle}deg)`
 	}
 }
 
-addImageBtn.addEventListener("click", handleAddImageClick);
-trackLocation()
+addImageBtn.addEventListener("click", handleAddImageClick)
+if(window.DeviceOrientationEvent && 'ontouchstart' in window){
+	isCompassEnabled = true
+	FULLTILT.getDeviceOrientation({ 'type': 'world' })
+	.then(handleDeviceOrientation)
+	.catch(error => {
+		isCompassEnabled = false
+	})
+}
+else{
+	isCompassEnabled = false
+}
+
