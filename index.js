@@ -99,6 +99,8 @@ const getSidebarItemInd = (sidebarItem) => {
 
 var isCompassEnabled = false
 var northAngle = 0
+const compass = document.querySelector(".content-directions")
+const compassText = document.querySelector(".content-directions__text")
 
 /**
  * Watch for device movement
@@ -109,6 +111,7 @@ const handleDeviceOrientation = (orientation) => {
 	orientation.listen(function() {
 		const currentOrientation = orientation.getScreenAdjustedEuler();
 		const compassHeading = (360 - currentOrientation.alpha + 90) % 360;
+		compassText.textContent = compassHeading
 		northAngle = 360 - compassHeading
 		rotateLayersWithCompass(northAngle)
 	})
@@ -133,6 +136,7 @@ const rotateLayersWithCompass = (angle) => {
 	for(const layerInd of layersWithCompass){
 		contentLayers.children[layerInd].style.transform = `rotate(${angle}deg)`
 	}
+	compass.style.transform = `rotate(${angle}deg)`
 }
 
 addImageBtn.addEventListener("click", handleAddImageClick)
