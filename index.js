@@ -21,7 +21,6 @@ const showSelectedImage = (event) => {
 }
 
 const sidebarItems = document.querySelector(".sidebar-items")
-const addCompassButtons = []
 
 const addSidebarItem = (imageURL) => {
 	const newSidebarItem = document.createElement("li")
@@ -49,7 +48,6 @@ const addSidebarItem = (imageURL) => {
 	const addCompassButton = newSidebarItem.querySelector(".actions-dropdown__item-button")
 	addCompassButton.addEventListener("click", event => handleAddCompassClick(event, newSidebarItem))
 	addCompassButton.disabled = !isCompassEnabled
-	addCompassButtons.push(addCompassButton)
 
 	// Maintain Add-Image button as last item
 	const sidebarItemButton = sidebarItems.children[sidebarItems.children.length - 1]
@@ -107,24 +105,11 @@ const compassText = document.querySelector(".content-directions__text")
  * Update layers(with added compass) when direction to North changes/ device moves
  * Disable "Add Compass" buttons if not on mobile
  */
-const handleDeviceOrientation = (orientation) => {
-	orientation.listen(function() {
-		const currentOrientation = orientation.getScreenAdjustedEuler();
-		const compassHeading = (360 - currentOrientation.alpha + 90) % 360;
-		compassText.textContent = compassHeading
-		northAngle = 360 - compassHeading
-		rotateLayersWithCompass(northAngle)
-	})
-}
-
-/**
- * Enable/Disable "Add Compass" buttons
- * @param {boolean} isEnabled 
- */
-const toggleAddCompassButton = (isEnabled) => {
-	for(const button in addCompassButtons){
-		button.disabled = !isEnabled
-	}
+const handleDeviceOrientation = (event) => {
+	const heading = event.webkitCompassHeading || Math.abs(event.alpha - 360)
+	compassText.textContent = heading.toFixed(1)
+	northAngle = heading * -1
+	rotateLayersWithCompass(northAngle)
 }
 
 /**
@@ -142,11 +127,7 @@ const rotateLayersWithCompass = (angle) => {
 addImageBtn.addEventListener("click", handleAddImageClick)
 if(window.DeviceOrientationEvent && 'ontouchstart' in window){
 	isCompassEnabled = true
-	FULLTILT.getDeviceOrientation({ 'type': 'world' })
-	.then(handleDeviceOrientation)
-	.catch(error => {
-		isCompassEnabled = false
-	})
+	window.addEventListener("deviceorientationabsolute", handleDeviceOrientation)
 }
 else{
 	isCompassEnabled = false
